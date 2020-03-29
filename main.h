@@ -4,7 +4,12 @@
 
 int loadCheckPoint(std::ifstream &);
 int parseSTFile(std::ifstream &);
-std::string storyTag(std::fstream);
-std::string spStoryTag(std::fstream);
-std::string promptTag(std::fstream);
-int saveCheckPoint();
+int changeScript(std::ifstream& , const std::string &)
+std::string storyTag(const std::ifstream &);
+std::string str_SPModify(const std::string &);
+
+std::string spStoryTag(const std::ifstream &,const std::map<std::string, std::string> &);
+std::string str_tokenize(std::string &);
+std::string promptTag(const std::ifstream &, std::map<std::string, std::string> &);
+int saveCheckPoint(std::ifstream &);
+void triggerEnd();

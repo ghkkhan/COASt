@@ -2,8 +2,8 @@
 
 ## TODO:
 - [ ] Get the Miscellaneous Functions Working.
-  - [ ] parsingSTFile()
-  - [ ] spStoryTag()
+  - [x] parsingSTFile()
+  - [x] spStoryTag()
   - [ ] promptTag()
   - [ ] checkPoint()
 - [ ] Get the main Function wokring with the rest of the functions.

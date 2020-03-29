@@ -3,5 +3,5 @@
 int main() {
     std::ifstream fil;
     loadCheckPoint(fil);
-    praseSTFile(fil);
+    parseSTFile(fil);
 }

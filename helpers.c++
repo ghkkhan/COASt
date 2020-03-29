@@ -17,27 +17,95 @@ int loadCheckPoint(std::ifstream &inFile) {
     inFile.open("./Files/" + fileName +".st");
     return 0;
 }
+
 //parses the file... main loop...
 int parseSTFile(std::ifstream & srcFile) {
-    std::bool sFlag = true;
-    while(sFlag) {
+    std::map<std::string, std::string> vars;
 
+    std::string nl = storyTag(srcFile);
+    while(nl == "") {//nl works as a string holder and a flag simultaneously. 
+        //the wiay to use these tags will be available in the documentation with great detail
+        if(nl == "error") {
+            return 1;
+        }
+        if(nl == "<!Story>") nl = storyTag(srcFile);
+        else if(nl == "<!Story_Spec>") nl = spStoryTag(srcFile, vars);
+        else if(nl == "<!Prompt>") nl = promptTag(srcFile, vars);
+        else if(nl == "<!CheckPoint>") saveCheckPoint(srcFile);
+        else if(nl == "") triggerEnd();
+        /*
+            @TODO
+            Add more functions as nessesary to expand the program.
+        */
     }
+    return 0;
 }
+
 //parses the Story tag
 std::string storyTag(std::ifstream & srcFile) {
     std::string nl;
     while(srcFile >> nl) {
         if(nl[0] == '<' && nl[1] =='!') {
-            //This means we have a tag...check what tag it is.
+            //This means we have a tag... let's check what tag it is.
             if(nl == "<!Story>") continue;//.....next line
             else if(nl == "<!wait>") {
                 std::cout << "Press Enter to Continue...";
                 std::cin >> nl;
+                //check if player wants to quit the program.
+                if(toLower(nl[0]) == 'q') return "";
             }
-            else return nl; //sends the tag back to the main program, where it goes to its appropriate function
+            else return nl; //sends the tag back to the parseSTFile function, where it goes to its appropriate function
         }
-        std::cout << nl << std::endl;
     }
+    //this area should never really be executed...(error!)
+    return "error";
 }
 
+std::string spStoryTag(std::ifstream & srcFile, std::map<std::string, std::string> hsh) {
+    /*
+        @TODO
+        Add the rest of the content... decide how to do this part...
+        ......
+        for now, this function only supports the main character's name...
+        pretty useless for now but its a start.
+        uses a string to string map. 
+        FINAL:: Template looks like this:
+        <!Story_Spec>
+        sentence sentence sentence <!Escape> keyword sentence sentence.
+        This tag will be followed by a single line... if you need to do this with multiple lines, use the tag multiple times.
+    */
+
+    std::string nl;
+    while(srcFile >> nl) {
+        //used a while loop but it should only really work for a single line:
+        //Will make it to work with multiple lines later....
+        nl = str_tokenize(nl);
+        std::cout << str_SPModify(nl) << std::endl;
+        return srcFile >> nl;
+    }
+    return "error";
+}
+
+std::string str_tokenize(std::string & line) {
+
+}
+
+std::string str_SPModify(std::string & line) {
+
+}
+
+std::string promptTag(std::ifstream & srcFile) {
+    /*
+        @TODO
+        get a number (number of choices )
+        display to user the choices... get a number from the user...
+        close current file and open the file chosen by the user.... 
+    */
+    return "";
+    
+}
+
+int saveCheckPoint(std::ifstream & srcFile) {
+    //save a string into the check point file?
+    return 0;
+}
