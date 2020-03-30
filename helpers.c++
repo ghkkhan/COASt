@@ -16,7 +16,7 @@ int loadCheckPoint(std::ifstream &inFile) {
     return changeScript(inFile, fileName);
 }
 
-int changeScript(const std::ifstream & inFile, const std::string & newFileName) {
+int changeScript(std::ifstream & inFile, const std::string & newFileName) {
     saveCheckPoint(newFileName);
     inFile.open("./Files/" + newFileName +".st");
     if(!inFile) {
@@ -27,7 +27,7 @@ int changeScript(const std::ifstream & inFile, const std::string & newFileName) 
 }
 
 //parses the file... main loop...
-int parseSTFile(std::ifstream & srcFile, nl) {
+int parseSTFile(std::ifstream & srcFile) {
     std::map<std::string, std::string> vars;
 
     std::string nl = "<!Story>";
@@ -39,7 +39,7 @@ int parseSTFile(std::ifstream & srcFile, nl) {
         if(nl == "<!Story>") nl = storyTag(srcFile);
         else if(nl == "<!Story_Spec>") nl = spStoryTag(srcFile, vars);
         else if(nl == "<!Prompt>") nl = promptTag(srcFile, vars);
-        else if(nl == "<!CheckPoint>") saveCheckPoint(srcFile);
+        // else if(nl == "<!CheckPoint>") saveCheckPoint(srcFile);
         // else if(nl == "") triggerEnd();
 
         /*
@@ -51,7 +51,7 @@ int parseSTFile(std::ifstream & srcFile, nl) {
 }
 
 //parses the Story tag
-std::string storyTag(const std::ifstream & srcFile) {
+std::string storyTag(std::ifstream & srcFile) {
     std::string nl;
     while(srcFile >> nl) {
         if(nl[0] == '<' && nl[1] =='!') {
@@ -61,7 +61,7 @@ std::string storyTag(const std::ifstream & srcFile) {
                 std::cout << "(Press Enter to Continue...) ";
                 std::cin >> nl;
                 //check if player wants to quit the program.
-                if(toLower(nl[0]) == 'q') return "";
+                if(tolower(nl[0]) == 'q') return "";
             }
             else return nl; //sends the tag back to the parseSTFile function, where it goes to its appropriate function
         }
@@ -73,8 +73,7 @@ std::string storyTag(const std::ifstream & srcFile) {
     //this area should never really be executed...(error!)
     return "error";
 }
-
-std::string spStoryTag(const std::ifstream & srcFile,const std::map<std::string, std::string> &hsh) {
+std::string spStoryTag(std::ifstream & srcFile,std::map<std::string, std::string> &hsh) {
     /*
         @TODO
         Add the rest of the content... decide how to do this part...
@@ -91,7 +90,8 @@ std::string spStoryTag(const std::ifstream & srcFile,const std::map<std::string,
     std::string nl;
     if(srcFile >> nl) {
         //Will make it to work with multiple lines later....
-        std::cout << str_SPModify(str_tokenize(nl), hsh) << std::endl;
+        std::vector<std::string> vect = str_tokenize(nl);
+        std::cout << str_SPModify(vect, hsh) << std::endl;
         return "<!Story>";
     }
     return "error";
@@ -101,7 +101,7 @@ std::vector<std::string> str_tokenize(const std::string & line) {
     std::string temp = "";
     std::vector<std::string> v;
     for(int i = 0; i < line.size(); i++) {
-        if(line[i] == " " && temp.size() != 0) {
+        if(line[i] == ' ' && temp.size() != 0) {
             v.push_back(temp);
             temp = "";
         }
@@ -132,7 +132,7 @@ std::string str_SPModify(std::vector<std::string> &v, std::map<std::string, std:
     return retVar;
 }
 
-std::string promptTag(const std::ifstream &srcFile, std::map<std::string, std::string> &hsh) {
+std::string promptTag(std::ifstream &srcFile, std::map<std::string, std::string> &hsh) {
     /*
         @TODO
         Two prompt types::
@@ -155,7 +155,7 @@ std::string promptTag(const std::ifstream &srcFile, std::map<std::string, std::s
     return "error";
 }
 
-int pInfo(const std::ifstream & srcFile, std::map<std::string, std::string> & hsh) {
+int pInfo(std::ifstream & srcFile, std::map<std::string, std::string> & hsh) {
     /*  Format::
     *****************
         Quesion quesion quesiton....?
@@ -166,7 +166,7 @@ int pInfo(const std::ifstream & srcFile, std::map<std::string, std::string> & hs
         The use will be prompted to answer the question and their answer will be reffererable using the Variable_Name ()...
         variable names are case-sensitive.....
     */
-    std::string answer;
+    std::string answer, s;
     if(srcFile >> s) {
         std::cout << s << std::endl << "(Enter your response and press enter to continue) : ";
         std::cin >> answer;
@@ -178,7 +178,7 @@ int pInfo(const std::ifstream & srcFile, std::map<std::string, std::string> & hs
     return 1;
 }
 
-std::string pChoice(const std::ifstream & srcFile) {
+std::string pChoice(std::ifstream & srcFile) {
     /* Format
         2 (number of choices)
         1) choice choice choice 
@@ -186,16 +186,17 @@ std::string pChoice(const std::ifstream & srcFile) {
         2) choice choice choice
         name of the second file to go to...
     */
+    std::string s;
     if(srcFile >> s) {
         // s should be a number, ideally... if not, then not my problem...
         try {
             int num = std::stoi(s);
             std::string answer;
-            std::vector<string> v(num);
+            std::vector<std::string> v(num);
             for(int i = 0; i < num; i++) {
                 if(srcFile >> s) {
                     std::cout << s << std::endl;
-                    if(!(srcFile >> v[i])) return 1;
+                    if(!(srcFile >> v[i])) return "error";
                 }
                 else {
                     return "error";
@@ -204,8 +205,8 @@ std::string pChoice(const std::ifstream & srcFile) {
 
             std::cout << "(Press a number and hit enter)";
             std::cin >> answer;//add a verifier so the valid number is entered.
-            int num = std::stoi(answer);
-            return v[answer];//returns a file name to be opened...
+            num = std::stoi(answer);
+            return v[num];//returns a file name to be opened...
         }
         catch (std::invalid_argument const &err) {
             std::cerr << "The number of choices entered isn't valid." <<std::endl;
@@ -221,7 +222,7 @@ int saveCheckPoint(const std::string & s) {
     //save a string into the check point file?
     std::ofstream fil;
     fil.open("./Files/checkPoint.st");
-    if(!fill) {
+    if(!fil) {
         std::cout << "Could not save..." << std::endl;
         return 1;
     };
