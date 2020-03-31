@@ -10,14 +10,15 @@ int loadCheckPoint(std::ifstream &inFile) {
     //read in the data in the check point file and return the "File-Name" to the main Program.
     std::string fileName;
     inFile >> fileName;
+    fileName = "/Start/";
     fileName.pop_back();
     fileName.erase(0,1);
-    inFile.close();
     return changeScript(inFile, fileName);
 }
 
 int changeScript(std::ifstream & inFile, const std::string & newFileName) {
     saveCheckPoint(newFileName);
+    inFile.close();
     inFile.open("./Files/" + newFileName +".st");
     if(!inFile) {
         std::cout << "Something went wrong while loading file." << std::endl;
@@ -34,6 +35,7 @@ int parseSTFile(std::ifstream & srcFile) {
     while(nl != "") { //nl works as a string holder and a flag simultaneously. 
         //the wiay to use these tags will be available in the documentation with great detail
         if(nl == "error") {
+            // saveCheckPoint("Start");
             return 1;
         }
         if(nl == "<!Story>") nl = storyTag(srcFile);
@@ -53,7 +55,7 @@ int parseSTFile(std::ifstream & srcFile) {
 //parses the Story tag
 std::string storyTag(std::ifstream & srcFile) {
     std::string nl;
-    while(srcFile >> nl) {
+    while(std::getline(srcFile, nl)) {
         if(nl[0] == '<' && nl[1] =='!') {
             //This means we have a tag... let's check what tag it is.
             if(nl == "<!Story>") continue;//.....next line
@@ -88,7 +90,7 @@ std::string spStoryTag(std::ifstream & srcFile,std::map<std::string, std::string
     */
 
     std::string nl;
-    if(srcFile >> nl) {
+    if(std::getline(srcFile, nl)) {
         //Will make it to work with multiple lines later....
         std::vector<std::string> vect = str_tokenize(nl);
         std::cout << str_SPModify(vect, hsh) << std::endl;
@@ -142,13 +144,15 @@ std::string promptTag(std::ifstream &srcFile, std::map<std::string, std::string>
         Here is the format::
     */
     std::string s;
-    if(srcFile >> s) {
+    if(std::getline(srcFile, s)) {
         if(s == "<!Prompt_Info>") {
             pInfo(srcFile, hsh);
             return "<!Story>";
         }
         else if(s == "<!Prompt_Choice>") {
             s = pChoice(srcFile);
+            std::cout << s << std::endl;
+            // std::cout << std::endl<< std::endl<< std::endl<< std::endl<< std::endl;
             if(changeScript(srcFile, s) == 0) return "<!Story>" ;
         }
     }
@@ -158,19 +162,19 @@ std::string promptTag(std::ifstream &srcFile, std::map<std::string, std::string>
 int pInfo(std::ifstream & srcFile, std::map<std::string, std::string> & hsh) {
     /*  Format::
     *****************
-        Quesion quesion quesiton....?
         <!Prompt>
         <!Prompt_Info>
+        Quesion quesion quesiton....?
         Variable_Name (Key)...
     *****************
         The use will be prompted to answer the question and their answer will be reffererable using the Variable_Name ()...
         variable names are case-sensitive.....
     */
     std::string answer, s;
-    if(srcFile >> s) {
+    if(std::getline(srcFile, s)) {
         std::cout << s << std::endl << "(Enter your response and press enter to continue) : ";
         std::cin >> answer;
-        if(srcFile >> s) {
+        if(std::getline(srcFile, s)) {
             hsh.insert(std::pair<std::string, std::string>(s, answer));
             return 0;
         }
@@ -187,16 +191,16 @@ std::string pChoice(std::ifstream & srcFile) {
         name of the second file to go to...
     */
     std::string s;
-    if(srcFile >> s) {
+    if(std::getline(srcFile, s)) {
         // s should be a number, ideally... if not, then not my problem...
         try {
             int num = std::stoi(s);
             std::string answer;
             std::vector<std::string> v(num);
             for(int i = 0; i < num; i++) {
-                if(srcFile >> s) {
+                if(std::getline(srcFile, s)) {
                     std::cout << s << std::endl;
-                    if(!(srcFile >> v[i])) return "error";
+                    if(!(std::getline(srcFile, v[i]))) return "error";
                 }
                 else {
                     return "error";
@@ -206,7 +210,10 @@ std::string pChoice(std::ifstream & srcFile) {
             std::cout << "(Press a number and hit enter)";
             std::cin >> answer;//add a verifier so the valid number is entered.
             num = std::stoi(answer);
-            return v[num];//returns a file name to be opened...
+            return v[num - 1];//returns a file name to be opened...
+        }
+        catch(std::bad_alloc & exception) {
+            std::cerr << "Bad Aloc, bruda" <<std::endl;
         }
         catch (std::invalid_argument const &err) {
             std::cerr << "The number of choices entered isn't valid." <<std::endl;
@@ -226,6 +233,6 @@ int saveCheckPoint(const std::string & s) {
         std::cout << "Could not save..." << std::endl;
         return 1;
     };
-    fil << s;
+    if(s != "error") fil <<'/' << s << '/';
     return 0;
 }
