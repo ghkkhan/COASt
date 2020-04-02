@@ -13,10 +13,12 @@ int parseSTFile(File & srcFile) {
             saveCheckPoint("Start");
             return 1;
         }
-        if(nl == "<!Story>") nl = storyTag(srcFile);
-        else if(nl == "<!Story_Spec>") nl = spStoryTag(srcFile, vars);
+        if(nl == "<!Story>") nl = storyTag(srcFile, vars);
         else if(nl == "<!Prompt>") nl = promptTag(srcFile, vars);
         else if(nl == "<!CheckPoint>") nl = saveCheckPoint(nl);
+        else {
+            std::cout << nl << std::endl;
+        }
     }
     saveCheckPoint("Start");
     return 0;

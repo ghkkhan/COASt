@@ -15,14 +15,14 @@ int loadCheckPoint(File &);
 int parseSTFile(File &);
 int changeScript(File & , const std::string &);
 
-std::string storyTag(File &);
-std::string spStoryTag(File &, std::map<std::string, std::string> &);
+std::string storyTag(File &, std::map<std::string, std::string> &);
+int pFormated(std::string &, std::map<std::string, std::string> &);
 std::vector<std::string> str_tokenize(const std::string &);
 std::string str_SPModify(std::vector<std::string> &v, std::map<std::string, std::string> &);
 
 std::string promptTag(File &, std::map<std::string, std::string> &);
 int pInfo(std::ifstream &, std::map<std::string, std::string> &);
-std::string pChoice( std::ifstream &);
+std::string pChoice(std::ifstream &, std::map<std::string, std::string> &);
 
 int saveCheckPoint(const std::string &);
 // void triggerEnd();

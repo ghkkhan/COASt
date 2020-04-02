@@ -1,4 +1,5 @@
 #include "main.h"
+
 std::string promptTag(File & fil, std::map<std::string, std::string> &hsh) {
     std::string s;
     if(std::getline(fil.strim, s)) {
@@ -7,7 +8,7 @@ std::string promptTag(File & fil, std::map<std::string, std::string> &hsh) {
             return "<!Story>";
         }
         else if(s == "<!Prompt_Choice>") {
-            s = pChoice(fil.strim);
+            s = pChoice(fil.strim, hsh);
             if(changeScript(fil, s) == 0) return "<!Story>";
         }
     }
@@ -17,7 +18,11 @@ std::string promptTag(File & fil, std::map<std::string, std::string> &hsh) {
 int pInfo(std::ifstream &srcFile, std::map<std::string, std::string> & hsh) {
     std::string answer, s;
     if(std::getline(srcFile, s)) {
-        std::cout << s << std::endl << "(Enter your response and press enter to continue) : ";
+        if(s.find("<!Escape>") != std::string::npos) {
+            pFormated(s, hsh);
+        }
+        else std::cout << s << std::endl;
+        std::cout << "(Enter your response and press enter to continue) : ";
         std::getline(std::cin, answer);
         if(std::getline(srcFile, s)) {
             hsh.insert(std::pair<std::string, std::string>(s, answer));
@@ -27,7 +32,7 @@ int pInfo(std::ifstream &srcFile, std::map<std::string, std::string> & hsh) {
     return 1;
 }
 
-std::string pChoice(std::ifstream & srcFile) {
+std::string pChoice(std::ifstream & srcFile, std::map<std::string, std::string> & hsh) {
     std::string s;
     if(std::getline(srcFile, s)) {
         // TODO : Add a function that checks user_input for valid data.
@@ -37,7 +42,11 @@ std::string pChoice(std::ifstream & srcFile) {
             std::vector<std::string> v(num);
             for(int i = 0; i < num; i++) {
                 if(std::getline(srcFile, s)) {
-                    std::cout << s << std::endl;
+
+                    if(s.find("<!Escape>") != std::string::npos) {
+                        pFormated(s, hsh);
+                    }
+                    else std::cout << s << std::endl;
                     if(!(std::getline(srcFile, v[i]))) return "error";
                 }
                 else {
@@ -45,7 +54,7 @@ std::string pChoice(std::ifstream & srcFile) {
                 }
             }
 
-            std::cout << "(Press a number and hit enter)";
+            std::cout << "(Press a number and hit enter) : ";
             std::getline(std::cin, answer);
             num = std::stoi(answer);
             return v[num - 1];//returns a file name to be opened...

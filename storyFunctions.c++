@@ -1,10 +1,10 @@
 #include "main.h"
 
 //parses the Story tag
-std::string storyTag(File & fil) {
+std::string storyTag(File & fil, std::map<std::string, std::string> &hsh) {
     std::string nl;
     while(std::getline(fil.strim, nl)) {
-        if(nl[0] == '<' && nl[1] =='!') {
+        if(nl.find("<!") != std::string::npos && nl.find("<!Escape>") == std::string::npos) {
             //This means we have a tag... let's check what tag it is.
             if(nl == "<!Story>") continue;//.....next line
             else if(nl == "<!Wait>") {
@@ -16,22 +16,23 @@ std::string storyTag(File & fil) {
             else return nl; //sends the tag back to the parseSTFile function, where it goes to its appropriate function
         }
         else {
-            // print story line
-            std::cout << nl << std::endl;
+            // print story line...formated.
+            if(nl.find("<!Escape>") == std::string::npos) {
+                std::cout << nl << std::endl;
+            }
+            else {
+                //this means there is atleast one escape tag in the line.
+                pFormated(nl, hsh);
+            }
         }
     }
     //this area should never really be executed...(error!)
     return "error";
 }
-std::string spStoryTag(File & fil,std::map<std::string, std::string> &hsh) {
-    std::string nl;
-    if(std::getline(fil.strim, nl)) {
-        //Will make it to work with multiple lines later....
-        std::vector<std::string> vect = str_tokenize(nl);
-        std::cout << str_SPModify(vect, hsh) << std::endl;
-        return "<!Story>";
-    }
-    return "error";
+int pFormated(std::string & nl, std::map<std::string, std::string> &hsh) {
+    std::vector<std::string> vect = str_tokenize(nl);
+    std::cout << str_SPModify(vect, hsh) << std::endl;
+    return 0;
 }
 
 std::vector<std::string> str_tokenize(const std::string & line) {
