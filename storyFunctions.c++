@@ -1,13 +1,13 @@
 #include "main.h"
 
 //parses the Story tag
-std::string storyTag(std::ifstream & srcFile) {
+std::string storyTag(File & fil) {
     std::string nl;
-    while(std::getline(srcFile, nl)) {
+    while(std::getline(fil.strim, nl)) {
         if(nl[0] == '<' && nl[1] =='!') {
             //This means we have a tag... let's check what tag it is.
             if(nl == "<!Story>") continue;//.....next line
-            else if(nl == "<!wait>") {
+            else if(nl == "<!Wait>") {
                 std::cout << "(Press Enter to Continue...) ";
                 std::cin >> nl;
                 //check if player wants to quit the program.
@@ -23,22 +23,9 @@ std::string storyTag(std::ifstream & srcFile) {
     //this area should never really be executed...(error!)
     return "error";
 }
-std::string spStoryTag(std::ifstream & srcFile,std::map<std::string, std::string> &hsh) {
-    /*
-        @TODO
-        Add the rest of the content... decide how to do this part...
-        ......
-        for now, this function only supports the main character's name...
-        pretty useless for now but its a start.
-        uses a string to string map. 
-        FINAL:: Template looks like this:
-        <!Story_Spec>
-        sentence sentence sentence <!Escape> keyword sentence sentence.
-        This tag will be followed by a single line... if you need to do this with multiple lines, use the tag multiple times.
-    */
-
+std::string spStoryTag(File & fil,std::map<std::string, std::string> &hsh) {
     std::string nl;
-    if(std::getline(srcFile, nl)) {
+    if(std::getline(fil.strim, nl)) {
         //Will make it to work with multiple lines later....
         std::vector<std::string> vect = str_tokenize(nl);
         std::cout << str_SPModify(vect, hsh) << std::endl;

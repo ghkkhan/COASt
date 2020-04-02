@@ -5,17 +5,22 @@
 #include <vector>
 #include <map>
 
-int loadCheckPoint(std::ifstream &);
+struct File {
+    std::ifstream strim;
+    std::string f_name;
+};
 
-int parseSTFile(std::ifstream &);
-int changeScript(std::ifstream& , const std::string &);
+int loadCheckPoint(File &);
 
-std::string storyTag(std::ifstream &);
-std::string spStoryTag(std::ifstream &, std::map<std::string, std::string> &);
+int parseSTFile(File &);
+int changeScript(File & , const std::string &);
+
+std::string storyTag(File &);
+std::string spStoryTag(File &, std::map<std::string, std::string> &);
 std::vector<std::string> str_tokenize(const std::string &);
 std::string str_SPModify(std::vector<std::string> &v, std::map<std::string, std::string> &);
 
-std::string promptTag(std::ifstream &, std::map<std::string, std::string> &);
+std::string promptTag(File &, std::map<std::string, std::string> &);
 int pInfo(std::ifstream &, std::map<std::string, std::string> &);
 std::string pChoice( std::ifstream &);
 
